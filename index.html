@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zone 5 Ops Desk — ARM Daily Tracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0F1830;
+    --navy-2:#182247;
+    --navy-3:#22305F;
+    --bg:#EEF1F6;
+    --card:#FFFFFF;
+    --border:#DFE3EC;
+    --ink:#141B2E;
+    --muted:#636D82;
+    --gold:#C9A227;
+    --gold-soft:#F4E9C9;
+    --teal:#0E7C66;
+    --teal-soft:#E1F3EE;
+    --amber:#B45309;
+    --amber-soft:#FCEDD9;
+    --rose:#B91C3C;
+    --rose-soft:#FBE3E8;
+    --slate-soft:#EAEDF3;
+  }
+  html, body{overflow-x:hidden; width:100%; max-width:100vw;}
+  body{background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;}
+  .no-scrollbar{-ms-overflow-style:none; scrollbar-width:none;}
+  .no-scrollbar::-webkit-scrollbar{display:none;}
+  .font-display{font-family:'Sora',sans-serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
+  ::-webkit-scrollbar{height:8px; width:8px;}
+  ::-webkit-scrollbar-thumb{background:#C3CADA; border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  [x-cloak]{display:none !important;}
+  .led{
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.06em;
+    color:var(--gold);
+    text-shadow:0 0 8px rgba(201,162,39,0.45);
+  }
+  .tab-btn{position:relative; transition:color .15s ease;}
+  .tab-btn.active{color:#fff;}
+  .tab-btn.active::after{
+    content:''; position:absolute; left:0; right:0; bottom:-13px; height:2px; background:var(--gold);
+    border-radius:2px;
+  }
+  .kpi-card{background:var(--card); border:1px solid var(--border); border-radius:14px;}
+  .badge{display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap;}
+  .input-field{
+    width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px; background:#fff; color:var(--ink);
+  }
+  .input-field:focus{outline:none; border-color:var(--navy-3); box-shadow:0 0 0 3px rgba(34,48,95,0.12);}
+  .label-eyebrow{
+    font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); font-weight:600;
+  }
+  table.op-table thead th{
+    font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--muted); font-weight:700;
+    padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap;
+  }
+  table.op-table tbody td{
+    padding:10px 12px; font-size:13.5px; border-bottom:1px solid #EEF0F5; vertical-align:middle;
+  }
+  table.op-table tbody tr:hover{background:#FAFBFD;}
+  .btn-primary{
+    background:var(--navy); color:#fff; border-radius:9px; padding:8px 16px; font-weight:600; font-size:14px;
+    display:inline-flex; align-items:center; gap:6px; transition:background .15s ease;
+  }
+  .btn-primary:hover{background:var(--navy-2);}
+  .btn-ghost{
+    border:1px solid var(--border); background:#fff; border-radius:9px; padding:8px 14px; font-weight:600; font-size:14px; color:var(--ink);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-ghost:hover{background:var(--slate-soft);}
+  .icon-btn{padding:6px; border-radius:7px; display:inline-flex;}
+  .icon-btn:hover{background:var(--slate-soft);}
+  .modal-backdrop{background:rgba(15,24,48,0.55); backdrop-filter:blur(2px);}
+  .modal-card{background:#fff; border-radius:16px; box-shadow:0 24px 60px rgba(15,24,48,0.35);}
+  .pill-select{appearance:none;}
+</style>
+</head>
+<body x-data="app()" x-init="init()" class="min-h-screen pb-16">
+
+<!-- HEADER -->
+<header class="text-white" style="background:linear-gradient(135deg,var(--navy),var(--navy-2) 60%,var(--navy-3));">
+  <div class="max-w-7xl mx-auto px-5 py-5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background:rgba(201,162,39,0.15); border:1px solid rgba(201,162,39,0.35);">
+        <i data-lucide="shield-check" class="w-6 h-6" style="color:var(--gold);"></i>
+      </div>
+      <div>
+        <h1 class="font-display font-bold text-lg leading-tight">Zone 5 Ops Desk</h1>
+        <p class="text-xs" style="color:#B7C0D8;">ARM Daily Tracker &middot; Health, Accident &amp; Travel &middot; Mumbai Zone 5</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-right hidden sm:block">
+        <p class="text-[10px] uppercase tracking-wider" style="color:#8A94B3;">Live Desk Time</p>
+        <p class="led text-xl font-bold" x-text="clockTime"></p>
+      </div>
+      <div class="text-right">
+        <p class="text-[10px] uppercase tracking-wider" style="color:#8A94B3;" x-text="clockDate"></p>
+        <p class="text-xs font-semibold" style="color:#DCE2F0;">Broker &middot; BQP &middot; POSP Channel</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV TABS -->
+  <div class="max-w-7xl mx-auto px-5 border-t" style="border-color:rgba(255,255,255,0.08);">
+    <nav class="flex gap-5 sm:gap-7 pt-3 text-sm font-semibold overflow-x-auto no-scrollbar" style="color:#9AA4C2; -webkit-overflow-scrolling:touch;">
+      <button @click="activeTab='dashboard'" :class="activeTab==='dashboard' ? 'active' : ''" class="tab-btn pb-3 flex items-center gap-2 flex-shrink-0">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+      </button>
+      <button @click="activeTab='policy'" :class="activeTab==='policy' ? 'active' : ''" class="tab-btn pb-3 flex items-center gap-2 flex-shrink-0">
+        <i data-lucide="file-stack" class="w-4 h-4"></i> Policy Tracker
+      </button>
+      <button @click="activeTab='claims'" :class="activeTab==='claims' ? 'active' : ''" class="tab-btn pb-3 flex items-center gap-2 flex-shrink-0">
+        <i data-lucide="heart-pulse" class="w-4 h-4"></i> Claims Tracker
+      </button>
+      <button @click="activeTab='meetings'" :class="activeTab==='meetings' ? 'active' : ''" class="tab-btn pb-3 flex items-center gap-2 flex-shrink-0">
+        <i data-lucide="users" class="w-4 h-4"></i> Meetings CRM
+      </button>
+      <button @click="activeTab='team'" :class="activeTab==='team' ? 'active' : ''" class="tab-btn pb-3 flex items-center gap-2 flex-shrink-0">
+        <i data-lucide="user-cog" class="w-4 h-4"></i> Team
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- CONTROL BAR -->
+<div class="max-w-7xl mx-auto px-5 mt-5 flex flex-wrap items-center gap-3">
+  <div class="relative flex-1 min-w-[240px]">
+    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style="color:var(--muted);"></i>
+    <input type="text" x-model="searchQuery" placeholder="Search policy no., broker/partner, claim ID, or inward no..."
+      class="input-field pl-9" style="padding-top:10px; padding-bottom:10px;">
+  </div>
+  <div class="flex items-center gap-2 kpi-card px-2 py-1.5">
+    <button @click="shiftMonth(-1)" class="icon-btn"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+    <span class="font-display font-semibold text-sm px-2 min-w-[130px] text-center" x-text="monthLabel(selectedMonth)"></span>
+    <button @click="shiftMonth(1)" class="icon-btn"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+  </div>
+  <div class="flex items-center gap-2 kpi-card px-3 py-1.5 max-w-full" x-show="activeTab!=='team'">
+    <i data-lucide="user-round" class="w-4 h-4 flex-shrink-0" style="color:var(--muted);"></i>
+    <select class="pill-select text-sm font-semibold bg-transparent max-w-[160px] truncate" x-model="selectedRM" style="border:none; outline:none;">
+      <option value="all">All RMs</option>
+      <template x-for="rm in rms" :key="rm.id">
+        <option :value="rm.id" x-text="rm.name"></option>
+      </template>
+    </select>
+  </div>
+  <template x-if="activeTab==='policy'">
+    <button @click="openPolicyForm()" class="btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> New Policy</button>
+  </template>
+  <template x-if="activeTab==='claims'">
+    <button @click="openClaimForm()" class="btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> New Claim</button>
+  </template>
+  <template x-if="activeTab==='meetings'">
+    <button @click="openMeetingForm()" class="btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> Log Meeting</button>
+  </template>
+  <template x-if="activeTab==='team'">
+    <button @click="openRMForm()" class="btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> Add RM</button>
+  </template>
+</div>
+
+<main class="max-w-7xl mx-auto px-5 mt-6">
+
+  <!-- ================= DASHBOARD ================= -->
+  <div x-show="activeTab==='dashboard'" x-cloak>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="kpi-card p-4">
+        <p class="label-eyebrow flex items-center gap-1"><i data-lucide="log-in" class="w-3.5 h-3.5"></i> Login FTD / MTD (₹ Lakh)</p>
+        <p class="font-display font-bold text-2xl mt-2" x-text="loginFTD() + ' / ' + loginMTD()"></p>
+        <p class="text-xs mt-1" style="color:var(--muted);">Premium logged today vs month-to-date</p>
+      </div>
+      <div class="kpi-card p-4">
+        <p class="label-eyebrow flex items-center gap-1"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> Issuance FTD / MTD (₹ Lakh)</p>
+        <p class="font-display font-bold text-2xl mt-2" style="color:var(--teal);" x-text="issuanceFTD() + ' / ' + issuanceMTD()"></p>
+        <p class="text-xs mt-1" style="color:var(--muted);">Premium converted &amp; booked as business</p>
+      </div>
+      <div class="kpi-card p-4">
+        <p class="label-eyebrow flex items-center gap-1"><i data-lucide="gauge" class="w-3.5 h-3.5"></i> DRR Required (₹ Lakh/day)</p>
+        <p class="font-display font-bold text-2xl mt-2" style="color:var(--gold);" x-text="drrRequired()"></p>
+        <p class="text-xs mt-1" style="color:var(--muted);" x-text="daysRemaining() + ' working day(s) left'"></p>
+      </div>
+      <div class="kpi-card p-4">
+        <p class="label-eyebrow flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Open Pendency</p>
+        <p class="font-display font-bold text-2xl mt-2" style="color:var(--rose);" x-text="openPendencyCount()"></p>
+        <p class="text-xs mt-1" style="color:var(--muted);">Policies + claims not closed</p>
+      </div>
+      <div class="kpi-card p-4">
+        <p class="label-eyebrow flex items-center gap-1"><i data-lucide="target" class="w-3.5 h-3.5"></i> Monthly Target (₹ Lakh)</p>
+        <input type="number" class="input-field mt-2 font-display font-bold text-lg" style="border:none; padding:0;"
+          x-model.number="targets[selectedMonth]" @input="persist()" placeholder="0">
+        <p class="text-xs mt-1" style="color:var(--muted);">Issuance target for this month</p>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4 mt-5">
+      <!-- Pipeline snapshot -->
+      <div class="kpi-card p-4 md:col-span-2">
+        <p class="font-display font-semibold text-sm mb-3">Pipeline Snapshot &middot; <span x-text="monthLabel(selectedMonth)"></span></p>
+        <div class="grid grid-cols-3 gap-3">
+          <template x-for="ptype in ['Fresh','Portability','Renewal']" :key="ptype">
+            <div class="rounded-xl p-3" style="background:var(--slate-soft);">
+              <p class="text-xs font-semibold" x-text="ptype"></p>
+              <p class="font-display font-bold text-xl mt-1" x-text="policiesForMonth().filter(p=>p.type===ptype).length"></p>
+              <p class="text-[11px] mt-1" style="color:var(--muted);">
+                <span x-text="policiesForMonth().filter(p=>p.type===ptype && p.status==='Issued').length"></span> issued
+              </p>
+            </div>
+          </template>
+        </div>
+        <div class="mt-4 pt-3 border-t" style="border-color:var(--border);">
+          <p class="text-xs font-semibold mb-2" style="color:var(--muted);">Recent activity</p>
+          <ul class="space-y-2 max-h-40 overflow-y-auto pr-1">
+            <template x-for="item in recentActivity()" :key="item.key">
+              <li class="text-xs flex items-start gap-2">
+                <span class="badge" :style="badgeStyle(item.color)" x-text="item.tag"></span>
+                <span x-text="item.text" style="color:var(--ink);"></span>
+              </li>
+            </template>
+            <li x-show="recentActivity().length===0" class="text-xs" style="color:var(--muted);">No activity logged yet — add a policy, claim or meeting to see it here.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Today's focus -->
+      <div class="kpi-card p-4">
+        <p class="font-display font-semibold text-sm mb-3 flex items-center gap-2"><i data-lucide="sunrise" class="w-4 h-4"></i> Today's Focus</p>
+        <div class="space-y-3">
+          <div>
+            <p class="text-xs font-semibold" style="color:var(--muted);">Claims stuck (pending / in progress)</p>
+            <p class="font-display font-bold text-lg" x-text="claims.filter(c=>c.status==='Pending'||c.status==='In Progress').length"></p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold" style="color:var(--muted);">QC Discrepancy tickets open</p>
+            <p class="font-display font-bold text-lg" style="color:var(--rose);" x-text="policies.filter(p=>p.status==='QC Discrepancy').length"></p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold" style="color:var(--muted);">Follow-ups due today or overdue</p>
+            <p class="font-display font-bold text-lg" style="color:var(--amber);" x-text="dueFollowUps().length"></p>
+            <ul class="mt-1 space-y-1">
+              <template x-for="m in dueFollowUps().slice(0,3)" :key="m.id">
+                <li class="text-xs" style="color:var(--ink);">&bull; <span x-text="m.partnerName"></span> — <span x-text="m.nextFollowUp"></span></li>
+              </template>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= POLICY TRACKER ================= -->
+  <div x-show="activeTab==='policy'" x-cloak>
+    <div class="kpi-card overflow-x-auto">
+      <table class="op-table w-full">
+        <thead>
+          <tr>
+            <th>Type</th><th>Customer</th><th>Policy/Proposal No.</th><th>Broker/BQP/POSP</th><th>RM</th>
+            <th>Login Date</th><th>Portal</th><th>Status</th><th>Inward No.</th><th>Premium</th><th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="p in filteredPolicies()" :key="p.id">
+            <tr :style="p.status==='QC Discrepancy' ? 'background:var(--rose-soft);' : ''">
+              <td><span class="badge" :style="typeBadgeStyle(p.type)" x-text="p.type"></span></td>
+              <td class="font-medium" x-text="p.customerName"></td>
+              <td class="font-mono text-xs" x-text="p.policyNo || '—'"></td>
+              <td x-text="p.brokerName || '—'"></td>
+              <td><span class="badge" style="background:var(--slate-soft); color:var(--ink);" x-text="rmName(p.rmId)"></span></td>
+              <td x-text="p.loginDate"></td>
+              <td>
+                <span class="text-xs" x-text="p.portal"></span>
+                <button x-show="p.type==='Fresh'" @click="alert('MARS Portal — '+ (p.policyNo||'this proposal') +' is currently: '+p.status)"
+                  class="badge ml-1" style="background:var(--gold-soft); color:#7A5E12; cursor:pointer;">
+                  <i data-lucide="radar" class="w-3 h-3"></i> Track in MARS
+                </button>
+              </td>
+              <td>
+                <select class="input-field pill-select py-1 text-xs" x-model="p.status" @change="onPolicyStatusChange(p)">
+                  <template x-for="s in statusOptions(p.type)" :key="s">
+                    <option :value="s" x-text="s"></option>
+                  </template>
+                </select>
+              </td>
+              <td class="font-mono text-xs" x-text="p.inwardNumber || '—'"></td>
+              <td x-text="p.premium ? '₹'+Number(p.premium).toLocaleString('en-IN') : '—'"></td>
+              <td class="max-w-[160px] truncate" :title="p.notes" x-text="p.notes || '—'"></td>
+              <td class="whitespace-nowrap">
+                <button @click="openPolicyForm(p)" class="icon-btn"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                <button @click="removeRecord('policies', p.id)" class="icon-btn"><i data-lucide="trash-2" class="w-4 h-4" style="color:var(--rose);"></i></button>
+              </td>
+            </tr>
+          </template>
+          <tr x-show="filteredPolicies().length===0">
+            <td colspan="12" class="text-center py-8" style="color:var(--muted);">No policies logged for this month yet. Click "New Policy" to add one.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= CLAIMS TRACKER ================= -->
+  <div x-show="activeTab==='claims'" x-cloak>
+    <div class="kpi-card overflow-x-auto">
+      <table class="op-table w-full">
+        <thead>
+          <tr>
+            <th>Claim ID</th><th>Insured/Patient</th><th>Hospital</th><th>Type</th><th>Amount</th><th>RM</th>
+            <th>Portal</th><th>Stuck Reason</th><th>Status</th><th>Action Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="c in filteredClaims()" :key="c.id">
+            <tr>
+              <td class="font-mono text-xs font-medium" x-text="c.claimId"></td>
+              <td class="font-medium" x-text="c.patientName"></td>
+              <td x-text="c.hospitalName"></td>
+              <td><span class="badge" style="background:var(--slate-soft); color:var(--ink);" x-text="c.claimType"></span></td>
+              <td x-text="c.amount ? '₹'+Number(c.amount).toLocaleString('en-IN') : '—'"></td>
+              <td><span class="badge" style="background:var(--slate-soft); color:var(--ink);" x-text="rmName(c.rmId)"></span></td>
+              <td x-text="c.portal"></td>
+              <td class="max-w-[160px] truncate" :title="c.stuckReason" x-text="c.stuckReason || '—'"></td>
+              <td>
+                <select class="input-field pill-select py-1 text-xs" x-model="c.status" @change="persist()"
+                  :style="'color:'+statusColor(c.status)+';font-weight:600;'">
+                  <option>Pending</option><option>In Progress</option><option>Approved</option><option>Rejected</option>
+                </select>
+              </td>
+              <td class="max-w-[160px] truncate" :title="c.actionNotes" x-text="c.actionNotes || '—'"></td>
+              <td class="whitespace-nowrap">
+                <button @click="openClaimForm(c)" class="icon-btn"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                <button @click="removeRecord('claims', c.id)" class="icon-btn"><i data-lucide="trash-2" class="w-4 h-4" style="color:var(--rose);"></i></button>
+              </td>
+            </tr>
+          </template>
+          <tr x-show="filteredClaims().length===0">
+            <td colspan="11" class="text-center py-8" style="color:var(--muted);">No stuck claims logged. Click "New Claim" to track one.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= MEETINGS CRM ================= -->
+  <div x-show="activeTab==='meetings'" x-cloak>
+    <div class="kpi-card overflow-x-auto">
+      <table class="op-table w-full">
+        <thead>
+          <tr>
+            <th>Partner Name</th><th>Type</th><th>RM</th><th>Person Met</th><th>Location</th>
+            <th>Purpose</th><th>Key Outcome</th><th>Next Follow-up</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="m in filteredMeetings()" :key="m.id">
+            <tr :style="isOverdue(m.nextFollowUp) ? 'background:var(--amber-soft);' : ''">
+              <td class="font-medium" x-text="m.partnerName"></td>
+              <td><span class="badge" style="background:var(--slate-soft); color:var(--ink);" x-text="m.partnerType"></span></td>
+              <td><span class="badge" style="background:var(--teal-soft); color:var(--teal);" x-text="rmName(m.rmId)"></span></td>
+              <td x-text="m.personMet"></td>
+              <td x-text="m.location"></td>
+              <td x-text="m.purpose"></td>
+              <td class="max-w-[200px] truncate" :title="m.keyOutcome" x-text="m.keyOutcome || '—'"></td>
+              <td x-text="m.nextFollowUp || '—'"></td>
+              <td class="whitespace-nowrap">
+                <button @click="openMeetingForm(m)" class="icon-btn"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                <button @click="removeRecord('meetings', m.id)" class="icon-btn"><i data-lucide="trash-2" class="w-4 h-4" style="color:var(--rose);"></i></button>
+              </td>
+            </tr>
+          </template>
+          <tr x-show="filteredMeetings().length===0">
+            <td colspan="9" class="text-center py-8" style="color:var(--muted);">No partner meetings logged. Click "Log Meeting" to add one.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= TEAM ================= -->
+  <div x-show="activeTab==='team'" x-cloak>
+    <div class="kpi-card p-4 mb-5">
+      <p class="font-display font-semibold text-sm mb-1">Team Performance &middot; <span x-text="monthLabel(selectedMonth)"></span></p>
+      <p class="text-xs mb-3" style="color:var(--muted);">Login &amp; issuance are attributed to whichever RM the policy is tagged to. Tag a broker/BQP/POSP to an RM below so new entries auto-suggest the right RM.</p>
+      <div class="overflow-x-auto">
+        <table class="op-table w-full">
+          <thead>
+            <tr>
+              <th>RM</th><th>Territory</th><th>Login MTD (₹L)</th><th>Issuance MTD (₹L)</th><th>Open Policy Pendency</th><th>Claims Pending</th><th>Meetings Logged</th><th>DRR Share Req. (₹L/day)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="rm in rms" :key="rm.id">
+              <tr>
+                <td class="font-medium" x-text="rm.name"></td>
+                <td x-text="rm.territory || '—'"></td>
+                <td x-text="rmLoginMTD(rm.id)"></td>
+                <td style="color:var(--teal); font-weight:600;" x-text="rmIssuanceMTD(rm.id)"></td>
+                <td x-text="rmOpenPolicies(rm.id)"></td>
+                <td x-text="rmPendingClaims(rm.id)"></td>
+                <td x-text="rmMeetingsCount(rm.id)"></td>
+                <td style="color:var(--gold); font-weight:600;" x-text="rmDRR(rm.id)"></td>
+              </tr>
+            </template>
+            <tr x-show="rms.length===0">
+              <td colspan="8" class="text-center py-8" style="color:var(--muted);">No RMs added yet. Click "Add RM" to build your team roster.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="kpi-card p-4">
+      <p class="font-display font-semibold text-sm mb-1">RM Roster &amp; Broker/BQP/POSP Mapping</p>
+      <p class="text-xs mb-3" style="color:var(--muted);">Each RM owns a territory and a set of brokers. When a policy or meeting names one of these brokers, the RM is auto-suggested.</p>
+      <div class="grid md:grid-cols-2 gap-4">
+        <template x-for="rm in rms" :key="'card-'+rm.id">
+          <div class="rounded-xl p-4" style="background:var(--slate-soft);">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="font-display font-bold" x-text="rm.name"></p>
+                <p class="text-xs" style="color:var(--muted);" x-text="rm.territory || 'No territory set'"></p>
+              </div>
+              <div class="flex gap-1">
+                <button @click="openRMForm(rm)" class="icon-btn"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                <button @click="removeRM(rm.id)" class="icon-btn"><i data-lucide="trash-2" class="w-4 h-4" style="color:var(--rose);"></i></button>
+              </div>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-1.5">
+              <template x-for="b in rm.brokers" :key="b">
+                <span class="badge" style="background:#fff; border:1px solid var(--border); color:var(--ink);" x-text="b"></span>
+              </template>
+              <span x-show="rm.brokers.length===0" class="text-xs" style="color:var(--muted);">No brokers mapped yet.</span>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ================= MODAL ================= -->
+<div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" @click.self="closeModal()">
+  <div class="modal-card w-full max-w-lg max-h-[88vh] overflow-y-auto p-6" @click.stop>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display font-bold text-lg" x-text="modalTitle()"></h3>
+      <button @click="closeModal()" class="icon-btn"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+
+    <!-- POLICY FORM -->
+    <template x-if="modalType==='policy'">
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Type</label>
+            <select class="input-field mt-1" x-model="form.type" @change="form.status = statusOptions(form.type)[0]; form.portal = portalForType(form.type);">
+              <option>Fresh</option><option>Portability</option><option>Renewal</option>
+            </select>
+          </div>
+          <div>
+            <label class="label-eyebrow">Login Date</label>
+            <input type="date" class="input-field mt-1" x-model="form.loginDate">
+          </div>
+        </div>
+        <div>
+          <label class="label-eyebrow">Customer Name</label>
+          <input type="text" class="input-field mt-1" x-model="form.customerName" placeholder="e.g. Rakesh Sharma">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Policy / Proposal No.</label>
+            <input type="text" class="input-field mt-1" x-model="form.policyNo" placeholder="Optional">
+          </div>
+          <div>
+            <label class="label-eyebrow">Broker / BQP / POSP</label>
+            <input type="text" class="input-field mt-1" x-model="form.brokerName" @input="autoSuggestRM('policy')" placeholder="Sourcing partner">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Portal (auto)</label>
+            <input type="text" class="input-field mt-1" x-model="form.portal" readonly style="background:var(--slate-soft);">
+          </div>
+          <div>
+            <label class="label-eyebrow">Status</label>
+            <select class="input-field mt-1" x-model="form.status">
+              <template x-for="s in statusOptions(form.type)" :key="s"><option :value="s" x-text="s"></option></template>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="label-eyebrow">Relationship Manager (RM)</label>
+          <select class="input-field mt-1" x-model="form.rmId">
+            <option value="">Unassigned</option>
+            <template x-for="rm in rms" :key="rm.id"><option :value="rm.id" x-text="rm.name"></option></template>
+          </select>
+          <p class="text-[11px] mt-1" style="color:var(--muted);">Auto-suggested from broker mapping in the Team tab — override anytime.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Inward No.</label>
+            <div class="flex gap-2">
+              <input type="text" class="input-field mt-1" x-model="form.inwardNumber" placeholder="INW-2026-XXXX">
+              <button type="button" @click="form.inwardNumber = generateInward()" class="btn-ghost mt-1 text-xs">Generate</button>
+            </div>
+          </div>
+          <div>
+            <label class="label-eyebrow">Premium (₹)</label>
+            <input type="number" class="input-field mt-1" x-model.number="form.premium" placeholder="0">
+          </div>
+        </div>
+        <div>
+          <label class="label-eyebrow">Notes</label>
+          <textarea class="input-field mt-1" rows="2" x-model="form.notes" placeholder="Pending reason, requirement, escalation detail..."></textarea>
+        </div>
+        <button @click="savePolicy()" class="btn-primary w-full justify-center mt-2">Save Policy</button>
+      </div>
+    </template>
+
+    <!-- CLAIM FORM -->
+    <template x-if="modalType==='claim'">
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Claim ID</label>
+            <input type="text" class="input-field mt-1" x-model="form.claimId">
+          </div>
+          <div>
+            <label class="label-eyebrow">Type</label>
+            <select class="input-field mt-1" x-model="form.claimType"><option>Cashless</option><option>Reimbursement</option></select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Insured / Patient Name</label>
+            <input type="text" class="input-field mt-1" x-model="form.patientName">
+          </div>
+          <div>
+            <label class="label-eyebrow">Hospital Name</label>
+            <input type="text" class="input-field mt-1" x-model="form.hospitalName">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Amount (₹)</label>
+            <input type="number" class="input-field mt-1" x-model.number="form.amount">
+          </div>
+          <div>
+            <label class="label-eyebrow">Portal</label>
+            <select class="input-field mt-1" x-model="form.portal"><option>HCS</option><option>Scantag Email</option><option>TPA Connect</option></select>
+          </div>
+        </div>
+        <div>
+          <label class="label-eyebrow">Stuck Reason</label>
+          <input type="text" class="input-field mt-1" x-model="form.stuckReason" placeholder="e.g. Discharge summary awaited">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Status</label>
+            <select class="input-field mt-1" x-model="form.status"><option>Pending</option><option>In Progress</option><option>Approved</option><option>Rejected</option></select>
+          </div>
+          <div>
+            <label class="label-eyebrow">Relationship Manager (RM)</label>
+            <select class="input-field mt-1" x-model="form.rmId">
+              <option value="">Unassigned</option>
+              <template x-for="rm in rms" :key="rm.id"><option :value="rm.id" x-text="rm.name"></option></template>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="label-eyebrow">Action Notes</label>
+          <textarea class="input-field mt-1" rows="2" x-model="form.actionNotes"></textarea>
+        </div>
+        <button @click="saveClaim()" class="btn-primary w-full justify-center mt-2">Save Claim</button>
+      </div>
+    </template>
+
+    <!-- MEETING FORM -->
+    <template x-if="modalType==='meeting'">
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Partner Name</label>
+            <input type="text" class="input-field mt-1" x-model="form.partnerName" @input="autoSuggestRM('meeting')">
+          </div>
+          <div>
+            <label class="label-eyebrow">Type</label>
+            <select class="input-field mt-1" x-model="form.partnerType"><option>Broker</option><option>BQP</option><option>POSP</option></select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label-eyebrow">Person Met</label>
+            <input type="text" class="input-field mt-1" x-model="form.personMet">
+          </div>
+          <div>
+            <label class="label-eyebrow">Location</label>
+            <input type="text" class="input-field mt-1" x-model="form.location" placeholder="e.g. Andheri office">
+          </div>
+        </div>
+        <div>
+          <label class="label-eyebrow">Relationship Manager (RM)</label>
+          <select class="input-field mt-1" x-model="form.rmId">
+            <option value="">Unassigned</option>
+            <template x-for="rm in rms" :key="rm.id"><option :value="rm.id" x-text="rm.name"></option></template>
+          </select>
+        </div>
+        <div>
+          <label class="label-eyebrow">Purpose</label>
+          <select class="input-field mt-1" x-model="form.purpose"><option>Pipeline Review</option><option>Claim Resolution</option><option>Renewal Drive</option></select>
+        </div>
+        <div>
+          <label class="label-eyebrow">Key Outcome</label>
+          <textarea class="input-field mt-1" rows="2" x-model="form.keyOutcome"></textarea>
+        </div>
+        <div>
+          <label class="label-eyebrow">Next Follow-up Date</label>
+          <input type="date" class="input-field mt-1" x-model="form.nextFollowUp">
+        </div>
+        <button @click="saveMeeting()" class="btn-primary w-full justify-center mt-2">Save Meeting</button>
+      </div>
+    </template>
+
+    <!-- RM FORM -->
+    <template x-if="modalType==='rm'">
+      <div class="space-y-3">
+        <div>
+          <label class="label-eyebrow">RM Name</label>
+          <input type="text" class="input-field mt-1" x-model="form.name" placeholder="e.g. Priya Nair">
+        </div>
+        <div>
+          <label class="label-eyebrow">Territory</label>
+          <input type="text" class="input-field mt-1" x-model="form.territory" placeholder="e.g. Andheri–Borivali corridor">
+        </div>
+        <div>
+          <label class="label-eyebrow">Mapped Brokers / BQPs / POSPs</label>
+          <textarea class="input-field mt-1" rows="3" x-model="form.brokersText" placeholder="Comma-separated, e.g. Anand Insurance Brokers, Suresh BQP, Zenith Brokers"></textarea>
+          <p class="text-[11px] mt-1" style="color:var(--muted);">These names are matched (case-insensitive) against the Broker/BQP/POSP field on policies and the Partner Name field on meetings to auto-suggest this RM.</p>
+        </div>
+        <button @click="saveRM()" class="btn-primary w-full justify-center mt-2">Save RM</button>
+      </div>
+    </template>
+  </div>
+</div>
+
+<footer class="max-w-7xl mx-auto px-5 mt-10 text-xs text-center" style="color:var(--muted);">
+  All data is stored locally in this browser only. Clearing browser storage will remove saved entries.
+</footer>
+
+<script>
+function app(){
+  return {
+    activeTab: 'dashboard',
+    searchQuery: '',
+    clockTime: '',
+    clockDate: '',
+    selectedMonth: '',
+    selectedRM: 'all',
+    policies: [],
+    claims: [],
+    meetings: [],
+    rms: [],
+    targets: {},
+    modalOpen: false,
+    modalType: '',
+    editingId: null,
+    form: {},
+
+    init(){
+      const saved = localStorage.getItem('arm_ops_tracker_data');
+      if(saved){
+        try{
+          const d = JSON.parse(saved);
+          this.policies = d.policies || [];
+          this.claims = d.claims || [];
+          this.meetings = d.meetings || [];
+          this.rms = d.rms || [];
+          this.targets = d.targets || {};
+        }catch(e){ console.error('Failed to load saved data', e); }
+      } else {
+        this.seedSampleData();
+      }
+      const now = new Date();
+      this.selectedMonth = this.monthKey(now.getFullYear(), now.getMonth());
+      if(this.targets[this.selectedMonth] === undefined) this.targets[this.selectedMonth] = 0;
+
+      this.tickClock();
+      setInterval(()=>this.tickClock(), 1000);
+
+      this.$nextTick(()=> lucide.createIcons());
+      this.$watch('activeTab', ()=> this.$nextTick(()=> lucide.createIcons()));
+      this.$watch('modalOpen', ()=> this.$nextTick(()=> lucide.createIcons()));
+    },
+
+    seedSampleData(){
+      const y = new Date().getFullYear();
+      const mm = String(new Date().getMonth()+1).padStart(2,'0');
+      const today = `${y}-${mm}-${String(new Date().getDate()).padStart(2,'0')}`;
+      this.rms = [
+        {id:'rm1', name:'Priya Nair', territory:'Andheri–Borivali corridor', brokers:['Anand Insurance Brokers','Suresh BQP']},
+        {id:'rm2', name:'Vikram Joshi', territory:'Thane–Mulund corridor', brokers:['Zenith Brokers']},
+        {id:'rm3', name:'Ayesha Khan', territory:'Central Mumbai (Dadar–Kurla)', brokers:[]},
+        {id:'rm4', name:'Rohan Mehta', territory:'South Mumbai (Colaba–Worli)', brokers:[]},
+        {id:'rm5', name:'Sneha Iyer', territory:'Navi Mumbai', brokers:[]},
+      ];
+      this.policies = [
+        {id:'p1', type:'Fresh', customerName:'Rakesh Sharma', policyNo:'PRP-88213', brokerName:'Anand Insurance Brokers', rmId:'rm1', loginDate:today, portal:'MARS Portal', status:'QC Passed', inwardNumber:'INW-'+y+'-4021', premium:24500, notes:'HbA1c report received, moving to UW.'},
+        {id:'p2', type:'Portability', customerName:'Neha Kulkarni', policyNo:'PRP-88240', brokerName:'Suresh BQP', rmId:'rm1', loginDate:today, portal:'Helios Portal', status:'UW Review', inwardNumber:'', premium:31200, notes:'Continuity proof from previous insurer awaited.'},
+        {id:'p3', type:'Renewal', customerName:'Imran Shaikh', policyNo:'POL-55210', brokerName:'Zenith Brokers', rmId:'rm2', loginDate:today, portal:'PayZapp', status:'R1 Link Generated', inwardNumber:'', premium:18700, notes:'Loading applicable due to BP history.'},
+      ];
+      this.claims = [
+        {id:'c1', claimId:'CLM-'+y+'-1042', patientName:'Sunita Rane', hospitalName:'Fortis Mulund', claimType:'Cashless', amount:85000, portal:'TPA Connect', rmId:'rm2', stuckReason:'Query on pre-existing disease raised', status:'Pending', actionNotes:'Escalated to TPA connect team on '+today+'.'},
+      ];
+      this.meetings = [
+        {id:'m1', partnerName:'Anand Insurance Brokers', partnerType:'Broker', rmId:'rm1', personMet:'Mr. Anand Deshmukh', location:'Andheri East office', purpose:'Renewal Drive', keyOutcome:'Shared list of 12 due renewals for August.', nextFollowUp: today},
+      ];
+      this.targets[this.monthKey(new Date().getFullYear(), new Date().getMonth())] = 40;
+      this.persist();
+    },
+
+    persist(){
+      localStorage.setItem('arm_ops_tracker_data', JSON.stringify({
+        policies: this.policies, claims: this.claims, meetings: this.meetings, rms: this.rms, targets: this.targets
+      }));
+    },
+
+    tickClock(){
+      const d = new Date();
+      this.clockTime = d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+      this.clockDate = d.toLocaleDateString('en-IN', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+    },
+
+    // ---------- month helpers ----------
+    monthKey(y,mIdx){ return y + '-' + String(mIdx+1).padStart(2,'0'); },
+    monthLabel(key){
+      if(!key) return '';
+      const [y,m] = key.split('-').map(Number);
+      const d = new Date(y, m-1, 1);
+      return d.toLocaleDateString('en-US', {month:'long', year:'numeric'});
+    },
+    shiftMonth(delta){
+      const [y,m] = this.selectedMonth.split('-').map(Number);
+      const d = new Date(y, (m-1)+delta, 1);
+      this.selectedMonth = this.monthKey(d.getFullYear(), d.getMonth());
+      if(this.targets[this.selectedMonth] === undefined) this.targets[this.selectedMonth] = 0;
+    },
+    isSameMonth(dateStr, key){
+      if(!dateStr) return false;
+      return dateStr.slice(0,7) === key;
+    },
+    todayStr(){
+      const d = new Date();
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    },
+    daysRemaining(){
+      const [y,m] = this.selectedMonth.split('-').map(Number);
+      const now = new Date();
+      const isCurrent = (y===now.getFullYear() && m-1===now.getMonth());
+      const lastDay = new Date(y, m, 0).getDate();
+      if(!isCurrent){
+        const selDate = new Date(y, m-1, 1);
+        const curDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        return selDate > curDate ? lastDay : 0;
+      }
+      return (lastDay - now.getDate()) + 1;
+    },
+
+    // ---------- policy helpers ----------
+    portalForType(type){
+      return type==='Fresh' ? 'MARS Portal' : (type==='Portability' ? 'Helios Portal' : 'PayZapp');
+    },
+    statusOptions(type){
+      if(type==='Fresh') return ['Logged in DC','Routed to MARS','Sent to QC','QC Passed','QC Discrepancy','In Underwriting','Issued'];
+      if(type==='Portability') return ['Logged in DC','Routed to Helios','UW Review','Continuity Verified','Issued','Rejected'];
+      return ['R1 Link Generated','Shortlink Sent','Loading Link Generated','Payment Received','Inward Created','Issued'];
+    },
+    generateInward(){
+      const y = new Date().getFullYear();
+      const n = Math.floor(1000 + Math.random()*9000);
+      return `INW-${y}-${n}`;
+    },
+    onPolicyStatusChange(p){
+      if((p.status==='QC Passed' || p.status==='Inward Created') && !p.inwardNumber){
+        p.inwardNumber = this.generateInward();
+      }
+      this.persist();
+    },
+    typeBadgeStyle(type){
+      if(type==='Fresh') return 'background:var(--teal-soft); color:var(--teal);';
+      if(type==='Portability') return 'background:#E7EAFB; color:#33409E;';
+      return 'background:var(--gold-soft); color:#7A5E12;';
+    },
+    statusColor(status){
+      if(status==='Approved' || status==='Issued') return 'var(--teal)';
+      if(status==='Rejected' || status==='QC Discrepancy') return 'var(--rose)';
+      if(status==='In Progress') return 'var(--amber)';
+      return 'var(--muted)';
+    },
+    badgeStyle(color){ return 'background:'+color+'22; color:'+color+';'; },
+
+    // ---------- computed metrics ----------
+    rmMatches(recordRmId){
+      return this.selectedRM==='all' || recordRmId===this.selectedRM;
+    },
+    policiesForMonth(){
+      return this.policies.filter(p=> this.isSameMonth(p.loginDate, this.selectedMonth) && this.rmMatches(p.rmId));
+    },
+    sumPremium(list){
+      const total = list.reduce((s,p)=> s + (Number(p.premium)||0), 0);
+      return total/100000;
+    },
+    fmtLakh(v){
+      if(!v) return '0';
+      return (Math.round(v*100)/100).toString();
+    },
+    loginFTD(){
+      const today = this.todayStr();
+      return this.fmtLakh(this.sumPremium(this.policies.filter(p=> p.loginDate === today && this.rmMatches(p.rmId))));
+    },
+    loginMTD(){ return this.fmtLakh(this.sumPremium(this.policiesForMonth())); },
+    issuanceFTD(){
+      const today = this.todayStr();
+      return this.fmtLakh(this.sumPremium(this.policies.filter(p=> p.status==='Issued' && p.loginDate === today && this.rmMatches(p.rmId))));
+    },
+    issuanceMTDValue(){
+      return this.sumPremium(this.policiesForMonth().filter(p=> p.status==='Issued'));
+    },
+    issuanceMTD(){
+      return this.fmtLakh(this.issuanceMTDValue());
+    },
+    drrRequired(){
+      const target = Number(this.targets[this.selectedMonth]) || 0;
+      const remaining = target - this.issuanceMTDValue();
+      const days = this.daysRemaining();
+      if(days <= 0) return remaining > 0 ? '—' : '0.0';
+      return (remaining/days).toFixed(2);
+    },
+    openPendencyCount(){
+      const openPolicies = this.policies.filter(p=> p.status!=='Issued' && p.status!=='Rejected' && this.rmMatches(p.rmId)).length;
+      const openClaims = this.claims.filter(c=> (c.status==='Pending' || c.status==='In Progress') && this.rmMatches(c.rmId)).length;
+      return openPolicies + openClaims;
+    },
+    dueFollowUps(){
+      const today = this.todayStr();
+      return this.meetings.filter(m=> m.nextFollowUp && m.nextFollowUp <= today)
+        .sort((a,b)=> a.nextFollowUp.localeCompare(b.nextFollowUp));
+    },
+    isOverdue(dateStr){
+      if(!dateStr) return false;
+      return dateStr < this.todayStr();
+    },
+    recentActivity(){
+      const items = [];
+      this.policies.forEach(p=> items.push({key:'p-'+p.id, sortKey:p.loginDate||'', tag:'Policy', color:'#22305F', text:p.customerName+' — '+p.status}));
+      this.claims.forEach(c=> items.push({key:'c-'+c.id, sortKey:'', tag:'Claim', color:'#B45309', text:c.patientName+' — '+c.status}));
+      this.meetings.forEach(m=> items.push({key:'m-'+m.id, sortKey:m.nextFollowUp||'', tag:'Meeting', color:'#0E7C66', text:m.partnerName+' — '+m.purpose}));
+      return items.sort((a,b)=> b.sortKey.localeCompare(a.sortKey)).slice(0,8);
+    },
+
+    // ---------- search filters ----------
+    filteredPolicies(){
+      let list = this.policiesForMonth();
+      const q = this.searchQuery.trim().toLowerCase();
+      if(q){
+        list = this.policies.filter(p=> this.rmMatches(p.rmId) && (
+          (p.policyNo||'').toLowerCase().includes(q) ||
+          (p.brokerName||'').toLowerCase().includes(q) ||
+          (p.customerName||'').toLowerCase().includes(q) ||
+          (p.inwardNumber||'').toLowerCase().includes(q) ||
+          this.rmName(p.rmId).toLowerCase().includes(q)
+        ));
+      }
+      return list;
+    },
+    filteredClaims(){
+      let list = this.claims.filter(c=> this.rmMatches(c.rmId));
+      const q = this.searchQuery.trim().toLowerCase();
+      if(!q) return list;
+      return list.filter(c=>
+        (c.claimId||'').toLowerCase().includes(q) ||
+        (c.patientName||'').toLowerCase().includes(q) ||
+        (c.hospitalName||'').toLowerCase().includes(q) ||
+        this.rmName(c.rmId).toLowerCase().includes(q)
+      );
+    },
+    filteredMeetings(){
+      let list = this.meetings.filter(m=> this.rmMatches(m.rmId));
+      const q = this.searchQuery.trim().toLowerCase();
+      if(!q) return list;
+      return list.filter(m=>
+        (m.partnerName||'').toLowerCase().includes(q) ||
+        (m.personMet||'').toLowerCase().includes(q) ||
+        this.rmName(m.rmId).toLowerCase().includes(q)
+      );
+    },
+
+    // ---------- RM helpers ----------
+    rmName(rmId){
+      const rm = this.rms.find(r=> r.id===rmId);
+      return rm ? rm.name : 'Unassigned';
+    },
+    rmIdForBroker(name){
+      if(!name) return '';
+      const n = name.trim().toLowerCase();
+      if(!n) return '';
+      const rm = this.rms.find(r=> (r.brokers||[]).some(b=> b.trim().toLowerCase()===n));
+      return rm ? rm.id : '';
+    },
+    autoSuggestRM(kind){
+      if(kind==='policy'){
+        const match = this.rmIdForBroker(this.form.brokerName);
+        if(match) this.form.rmId = match;
+      } else if(kind==='meeting'){
+        const match = this.rmIdForBroker(this.form.partnerName);
+        if(match) this.form.rmId = match;
+      }
+    },
+    rmLoginMTD(rmId){
+      const list = this.policies.filter(p=> p.rmId===rmId && this.isSameMonth(p.loginDate, this.selectedMonth));
+      return this.fmtLakh(this.sumPremium(list));
+    },
+    rmIssuanceMTDValue(rmId){
+      const list = this.policies.filter(p=> p.rmId===rmId && this.isSameMonth(p.loginDate, this.selectedMonth) && p.status==='Issued');
+      return this.sumPremium(list);
+    },
+    rmIssuanceMTD(rmId){
+      return this.fmtLakh(this.rmIssuanceMTDValue(rmId));
+    },
+    rmOpenPolicies(rmId){
+      return this.policies.filter(p=> p.rmId===rmId && p.status!=='Issued' && p.status!=='Rejected').length;
+    },
+    rmPendingClaims(rmId){
+      return this.claims.filter(c=> c.rmId===rmId && (c.status==='Pending' || c.status==='In Progress')).length;
+    },
+    rmMeetingsCount(rmId){
+      return this.meetings.filter(m=> m.rmId===rmId && this.isSameMonth(m.nextFollowUp, this.selectedMonth)).length;
+    },
+    rmDRR(rmId){
+      const rmCount = this.rms.length || 1;
+      const teamTarget = Number(this.targets[this.selectedMonth]) || 0;
+      const shareTarget = teamTarget / rmCount;
+      const remaining = shareTarget - this.rmIssuanceMTDValue(rmId);
+      const days = this.daysRemaining();
+      if(days <= 0) return remaining > 0 ? '—' : '0.0';
+      return (remaining/days).toFixed(2);
+    },
+
+    // ---------- CRUD: policy ----------
+    openPolicyForm(p){
+      this.modalType = 'policy';
+      this.editingId = p ? p.id : null;
+      this.form = p ? {...p} : {
+        type:'Fresh', customerName:'', policyNo:'', brokerName:'', rmId: (this.selectedRM!=='all' ? this.selectedRM : ''), loginDate:this.todayStr(),
+        portal:'MARS Portal', status:'Logged in DC', inwardNumber:'', premium:'', notes:''
+      };
+      this.modalOpen = true;
+    },
+    savePolicy(){
+      if(!this.form.customerName){ alert('Please enter the customer name.'); return; }
+      if(this.editingId){
+        const idx = this.policies.findIndex(p=>p.id===this.editingId);
+        this.policies[idx] = {...this.form, id:this.editingId};
+      } else {
+        this.policies.push({...this.form, id:'p'+Date.now()});
+      }
+      this.persist();
+      this.closeModal();
+    },
+
+    // ---------- CRUD: claim ----------
+    openClaimForm(c){
+      this.modalType = 'claim';
+      this.editingId = c ? c.id : null;
+      this.form = c ? {...c} : {
+        claimId: 'CLM-'+new Date().getFullYear()+'-'+Math.floor(1000+Math.random()*9000),
+        patientName:'', hospitalName:'', claimType:'Cashless', amount:'', portal:'HCS', rmId:(this.selectedRM!=='all' ? this.selectedRM : ''),
+        stuckReason:'', status:'Pending', actionNotes:''
+      };
+      this.modalOpen = true;
+    },
+    saveClaim(){
+      if(!this.form.patientName){ alert('Please enter the insured/patient name.'); return; }
+      if(this.editingId){
+        const idx = this.claims.findIndex(c=>c.id===this.editingId);
+        this.claims[idx] = {...this.form, id:this.editingId};
+      } else {
+        this.claims.push({...this.form, id:'c'+Date.now()});
+      }
+      this.persist();
+      this.closeModal();
+    },
+
+    // ---------- CRUD: meeting ----------
+    openMeetingForm(m){
+      this.modalType = 'meeting';
+      this.editingId = m ? m.id : null;
+      this.form = m ? {...m} : {
+        partnerName:'', partnerType:'Broker', rmId:(this.selectedRM!=='all' ? this.selectedRM : ''), personMet:'', location:'', purpose:'Pipeline Review',
+        keyOutcome:'', nextFollowUp:''
+      };
+      this.modalOpen = true;
+    },
+    saveMeeting(){
+      if(!this.form.partnerName){ alert('Please enter the partner name.'); return; }
+      if(this.editingId){
+        const idx = this.meetings.findIndex(m=>m.id===this.editingId);
+        this.meetings[idx] = {...this.form, id:this.editingId};
+      } else {
+        this.meetings.push({...this.form, id:'m'+Date.now()});
+      }
+      this.persist();
+      this.closeModal();
+    },
+
+    // ---------- CRUD: RM ----------
+    openRMForm(rm){
+      this.modalType = 'rm';
+      this.editingId = rm ? rm.id : null;
+      this.form = rm ? {name:rm.name, territory:rm.territory, brokersText:(rm.brokers||[]).join(', ')} : {name:'', territory:'', brokersText:''};
+      this.modalOpen = true;
+    },
+    saveRM(){
+      if(!this.form.name){ alert('Please enter the RM name.'); return; }
+      const brokers = (this.form.brokersText||'').split(',').map(b=>b.trim()).filter(Boolean);
+      if(this.editingId){
+        const idx = this.rms.findIndex(r=>r.id===this.editingId);
+        this.rms[idx] = {...this.rms[idx], name:this.form.name, territory:this.form.territory, brokers};
+      } else {
+        this.rms.push({id:'rm'+Date.now(), name:this.form.name, territory:this.form.territory, brokers});
+      }
+      this.persist();
+      this.closeModal();
+    },
+    removeRM(id){
+      if(!confirm('Remove this RM? Existing records tagged to them will show as Unassigned.')) return;
+      this.rms = this.rms.filter(r=> r.id!==id);
+      if(this.selectedRM===id) this.selectedRM = 'all';
+      this.persist();
+    },
+
+    removeRecord(collection, id){
+      if(!confirm('Delete this record? This cannot be undone.')) return;
+      this[collection] = this[collection].filter(r=> r.id !== id);
+      this.persist();
+    },
+
+    modalTitle(){
+      const verb = this.editingId ? 'Edit' : 'New';
+      if(this.modalType==='policy') return verb+' Policy';
+      if(this.modalType==='claim') return verb+' Claim';
+      if(this.modalType==='meeting') return verb+' Partner Meeting';
+      if(this.modalType==='rm') return verb+' RM';
+      return '';
+    },
+    closeModal(){ this.modalOpen = false; this.form = {}; this.editingId = null; }
+  }
+}
+</script>
+</body>
+</html>
